@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.backend.mapper.UserMapper">
+
+    <sql id="tablename">m_user</sql>
+
+    <sql id="basicColumns">user_password, user_name, user_email, user_phone</sql>
+    <sql id="safeColumns">user_id, user_name, user_email, user_phone</sql>
+    <sql id="allColumns">user_id, user_password, user_name, user_email, user_phone</sql>
+
+    <resultMap id="UserResultMap" type="com.example.backend.model.User">
+        <id property="userId" column="user_id" />
+        <result property="userPassword" column="user_password" />
+        <result property="userName" column="user_name" />
+        <result property="userEmail" column="user_email" />
+        <result property="userPhone" column="user_phone" />
+    </resultMap>
+
+
+
+    <select id="verifyUserByUserEmail" resultMap="UserResultMap">
+        SELECT <include refid="allColumns"/>
+        FROM <include refid="tablename"/>
+        WHERE user_email = #{userEmail}
+    </select>
+
+    <select id="findUserByUserEmail" resultMap="UserResultMap">
+        SELECT <include refid="safeColumns"/> 
+        FROM <include refid="tablename"/>
+        WHERE user_email = #{userEmail}
+    </select>
+
+    <select id="findUserByUserId" resultMap="UserResultMap">
+        SELECT <include refid="allColumns"/>
+        FROM <include refid="tablename"/>
+        WHERE user_id = #{userId}
+    </select>
+    
+    <select id="existsByUserEmail" resultType="boolean">
+        SELECT COUNT(1) > 0 
+        FROM <include refid="tablename"/> 
+        WHERE user_email = #{userEmail}
+    </select>
+    
+    <insert id="insertUser" parameterType="com.example.backend.model.User" useGeneratedKeys="true" keyProperty="userId">
+        INSERT INTO <include refid="tablename"/> (<include refid="basicColumns"/>)
+        VALUES (#{userPassword}, #{userName}, #{userEmail}, #{userPhone})
+    </insert>
+
+    <update id="updateUser" parameterType="com.example.backend.model.User">
+        UPDATE <include refid="tablename"/>
+        <set>
+            <if test="userPassword != null"> user_password = #{userPassword},</if>
+            <if test="userName != null"> user_name = #{userName},</if>
+            <if test="userEmail != null"> user_email = #{userEmail},</if>
+            <if test="userPhone != null"> user_phone = #{userPhone},</if>
+        </set>
+        WHERE user_id = #{userId}
+    </update>
+
+    <select id="countAllUsers" resultType="int">
+        SELECT COUNT( user_id ) 
+        FROM <include refid="tablename"/>
+    </select>
+
+    <select id="getAllEmails" resultType="string">
+        SELECT user_email 
+        FROM <include refid="tablename"/> 
+        LIMIT 10
+    </select>
+
+</mapper>

@@ -1,0 +1,150 @@
+/* ==========================================================================
+   🎨 アプリ共通デザインシステム（CSS変数）
+   ========================================================================== */
+:root {
+  /* カラーパレット（Slate & Blue テイスト） */
+  --color-primary: #3b82f6;       /* メインの青 */
+  --color-primary-hover: #2563eb; /* ホバー時の青 */
+  --color-secondary: #64748b;     /* サブのグレー */
+  --color-secondary-hover: #475569;
+  
+  --color-bg-main: #fafafa;       /* アプリ全体の背景 */
+  --color-bg-card: #ffffff;       /* カードやコンテナの白背景 */
+  --color-bg-inline: #f8fafc;     /* グリッドや入力欄などの薄いグレー背景 */
+  
+  --color-text-main: #1e293b;     /* 主要な文字色（濃いグレー） */
+  --color-text-sub: #475569;      /* 補足の文字色 */
+  --color-text-muted: #94a3b8;    /* さらに薄い文字色 */
+  
+  --color-border: #e2e8f0;        /* 標準の境界線 */
+  --color-border-focus: #60a5fa;  /* フォーカス時の境界線 */
+
+  /* 角丸（Radius）の統一 */
+  --radius-sm: 6px;               /* 小さなパーツ用 */
+  --radius-md: 12px;              /* カードやコンテナの中身用 */
+  --radius-lg: 16px;              /* メインカードや大きな外枠用 */
+  --radius-full: 9999px;          /* カプセル型ボタン用 */
+
+  /* 影（Box Shadow）の統一 */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+}
+
+/* ==========================================================================
+   🧱 共通コンポーネントクラス（各Vueファイルで使い回す）
+   ========================================================================== */
+
+/* 1. 標準のカード・コンテナ枠 */
+.base-card {
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+/* 2. 入力フォーム（input, textarea, select共通） */
+.form-control {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--color-text-main);
+  background-color: var(--color-bg-inline);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.form-control:focus {
+  outline: none;
+  border-color: var(--color-border-focus);
+  background-color: var(--color-bg-card);
+}
+
+/* 3. ボタン（プライマリ・カプセル型） */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  background-color: var(--color-primary);
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+.btn-primary:hover {
+  background-color: var(--color-primary-hover);
+}
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+/* 4. ボタン（セカンダリ・キャンセル用など） */
+.btn-secondary {
+  border-radius: var(--radius-full);
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  color: #ffffff;
+  background-color: var(--color-secondary);
+  transition: background-color 0.2s ease;
+}
+.btn-secondary:hover {
+  background-color: var(--color-secondary-hover);
+}
+
+/* 🚀 お気に入りボタンを右上に固定するスタイル */
+.favorite-wrapper {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10; /* 👈 リンクより上に配置して確実にクリックできるようにする */
+  background: rgba(255, 255, 255, 0.85); /* ハートが見えやすいように背景を少し白く */
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* --- siteResultDetail.vue の最下部に追加 --- */
+
+/* 本物のチェックボックスは非表示 */
+.favorite-checkbox {
+  display: none;
+}
+
+.heart-icon {
+  cursor: pointer;
+  display: inline-block;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+/* ✨ FontAwesomeを使用したブックマークの基本スタイル */
+.heart-icon::before {
+  content: "♡";
+  font-weight: 400; /* Regular: 枠線だけの状態 */
+  font-size: 26px;  /* 詳細画面用に見栄えのするサイズ */
+  color: #cbd5e1;   /* スタイリッシュな薄いグレー */
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+/* 🎉 ブックマークON（チェックが入ったとき） */
+.favorite-checkbox:checked + .heart-icon::before {
+  content: "♥";
+  font-weight: 900; /* Solid: 塗りつぶしの状態に切り替え */
+  color: #ff3ca7;   /* 映えるきれいなブルー（お好みでブランドカラーに） */
+  animation: popEffect 0.3s ease-in-out; /* クリック時の心地よいアニメーション */
+}
+

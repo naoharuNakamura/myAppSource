@@ -1,0 +1,2 @@
+フロントエンドはnpm installをした後run buildで起動します
+バックエンドはPower Shellなら.\gradlew bootRunで起動します

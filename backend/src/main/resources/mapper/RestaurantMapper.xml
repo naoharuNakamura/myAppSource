@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.backend.mapper.RestaurantMapper">
+    <sql id="tablename">m_restaurant</sql>
+
+    <sql id="RestaurantColumns"> restaurant_id, restaurant_name, restaurant_img, restaurant_rating,
+        restaurant_genre, restaurant_price_range, restaurant_area, restaurant_open_hour,
+        restaurant_close_hour, restaurant_address, restaurant_phone, restaurant_url,
+        restaurant_closed_days 
+    </sql>
+
+    <resultMap id="RestaurantResultMap" type="com.example.backend.model.Restaurant">
+        <id property="restaurantId" column="restaurant_id" />
+        <result property="restaurantName" column="restaurant_name" />
+        <result property="restaurantImg" column="restaurant_img" />
+        <result property="restaurantRating" column="restaurant_rating" />
+        <result property="restaurantGenre" column="restaurant_genre" />
+        <result property="restaurantPriceRange" column="restaurant_price_range" />
+        <result property="restaurantArea" column="restaurant_area" />
+        <result property="restaurantOpenHour" column="restaurant_open_hour" />
+        <result property="restaurantCloseHour" column="restaurant_close_hour" />
+        <result property="restaurantAddress" column="restaurant_address" />
+        <result property="restaurantPhone" column="restaurant_phone" />
+        <result property="restaurantUrl" column="restaurant_Url" />
+        <result property="restaurantClosedDays" column="restaurant_closed_days" />
+    </resultMap>
+
+    <select id="findDistinctGenres" resultType="string">
+        SELECT DISTINCT restaurant_genre 
+        FROM <include refid="tablename"/> 
+    </select>
+
+    <select id="findDistinctPriceRanges" resultType="string">
+        SELECT DISTINCT restaurant_price_range 
+        FROM <include refid="tablename"/>
+    </select>
+
+    <select id="findDistinctAreas" resultType="string">
+        SELECT DISTINCT restaurant_area 
+        FROM <include refid="tablename"/>
+    </select>
+
+    <select id="findDistinctRatings" resultType="double">
+        SELECT DISTINCT restaurant_rating 
+        FROM <include refid="tablename"/>
+    </select>
+
+    <select id="findAll" resultMap="RestaurantResultMap">
+        SELECT <include refid="RestaurantColumns" />
+        FROM <include refid="tablename"/>
+    </select>
+
+    <select id="findAllByIds" resultMap="RestaurantResultMap"> 
+        SELECT <include refid="RestaurantColumns" />
+        FROM <include refid="tablename"/> 
+        WHERE restaurant_id IN 
+        <foreach item="id" collection="restaurantId" open="(" separator="," close=")">
+         #{id} 
+        </foreach>
+    </select>
+
+    <select id="findByRestaurantId" resultMap="RestaurantResultMap">
+        SELECT  <include refid="RestaurantColumns" />
+        FROM <include refid="tablename"/> 
+        WHERE restaurant_id = #{restaurantId}
+    </select>
+
+    <select id="searchRestaurants" resultMap="RestaurantResultMap">
+        SELECT  <include refid="RestaurantColumns" />
+        FROM <include refid="tablename"/> 
+      
+        <where>
+            <if test="isAndSearch == true">
+                <if test="restaurantName != null and restaurantName != ''"> 
+                    AND LOWER(restaurant_name) LIKE '%' || LOWER(#{restaurantName}) || '%' 
+                </if>
+                <if test="minRating != null and maxRating != null">
+                    AND (restaurant_rating BETWEEN #{minRating} AND #{maxRating})
+                </if>
+                <if test="restaurantPriceRange != null and restaurantPriceRange != ''">
+                    AND restaurant_price_range = #{restaurantPriceRange}
+                </if>   
+                <if test="restaurantGenre != null and restaurantGenre != ''">
+                    AND restaurant_genre = #{restaurantGenre}
+                </if>
+                <if test="restaurantArea != null and restaurantArea != ''">
+                    AND restaurant_area = #{restaurantArea} 
+                </if>
+            </if>
+
+            <if test="isAndSearch != true">
+                <trim prefix="(" suffix=")" prefixOverrides="OR">
+                    <if test="restaurantName != null and restaurantName != ''">
+                        OR LOWER(restaurant_name) LIKE '%' || LOWER(#{restaurantName}) || '%'
+                    </if>
+                    <if test="minRating != null and maxRating != null">
+                        OR (restaurant_rating BETWEEN #{minRating} AND #{maxRating})
+                    </if>
+                    <if test="restaurantPriceRange != null and restaurantPriceRange != ''">
+                        OR restaurant_price_range = #{restaurantPriceRange}
+                    </if>
+                    <if test="restaurantGenre != null and restaurantGenre != ''">
+                        OR restaurant_genre = #{restaurantGenre} 
+                    </if>
+                    <if test="restaurantArea != null and restaurantArea != ''"> 
+                        OR restaurant_area = #{restaurantArea} 
+                    </if>
+                </trim>
+            </if>
+        </where>
+    </select>
+</mapper>
