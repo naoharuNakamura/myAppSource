@@ -39,7 +39,8 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: ROUTES.RESULT_DETAIL_PATH, // 店舗IDをURLパラメータとして受け取れるように設定
     name: ROUTE_NAMES.RESULT_DETAIL,
-    component: siteResultDetail
+    component: siteResultDetail,
+    props: true
   },
   {
     path: ROUTES.MYPAGE,

@@ -38,7 +38,6 @@ export function useRestaurantSearch() {
     restaurantPriceRange: (route.query.restaurantPriceRange as string) || '',
   });
 
-  // --- マスタデータ取得 ---
   const fetchMasterData = async () => {
     try {
       const [genres, areas, prices, ratings] = await Promise.all([
@@ -56,25 +55,22 @@ export function useRestaurantSearch() {
     }
   };
 
-  // --- 検索実行 (API通信) ---
   const executeSearch = async (page: number = SEARCH_CONFIG.INITIAL_PAGE) => {
-// 💡 修正：ページ番号の境界チェックを 1-indexed (1始まり) に合わせる
     let targetPage = page;
-    
-    // 0以下が渡された場合は最低ページの1にする
+
     if (targetPage < 1) {
       targetPage = 1;
     }
 
     if (totalPages.value > 0) {
-      // 最大ページを超えないように制限
+
       if (targetPage > totalPages.value) {
         targetPage = totalPages.value;
       }
     }
 
     isLoading.value = true;
-    currentPage.value = targetPage; // 修正したページ番号を状態にセット
+    currentPage.value = targetPage; 
 
     try {
       const searchParams = {
@@ -91,12 +87,10 @@ export function useRestaurantSearch() {
 
       const response = await apiService.searchRestaurants(searchParams);
 
-      // 修正：バックエンドのレスポンス構造（response.data）に直接合わせる
-      allResults.value = response.data.list;         // content → list に変更
-      totalPages.value = response.data.pages;        // page.pages → pages に変更
-      totalElements.value = response.data.total;     // page.totalElements → total に変更
+      allResults.value = response.data.list;
+      totalPages.value = response.data.pages;      
+      totalElements.value = response.data.total;     
 
-      // ページ制御関連も同様に修正
       isFirstPage.value = response.data.isFirstPage;
       isLastPage.value = response.data.isLastPage;
     } catch (error) {
@@ -111,18 +105,16 @@ export function useRestaurantSearch() {
     }
   };
 
-  // --- 検索ボタン押下時の遷移処理 ---
   const handleSearchSubmit = () => {
-    // 空文字の条件を除外してクエリを作成
+
     const activeConditions = Object.fromEntries(
       Object.entries(searchForm.value).filter(([_, value]) => value !== '')
     );
-    // 検索モード（AND/OR）もクエリに含めて遷移する
+ 
     activeConditions.isAndSearch = isAndSearch.value ? 'true' : 'false';
     router.push({ name: ROUTE_NAMES.RESULT, query: activeConditions });
   };
 
-  // --- ソート変更ハンドラ ---
   const handleSortChange = (event: Event) => {
     const target = event.target as HTMLSelectElement;
     router.push({
@@ -135,7 +127,7 @@ export function useRestaurantSearch() {
     });
   };
 
-  // --- 条件クリア ---
+
   const clearQuery = () => {
     searchForm.value = {
       restaurantName: '',
@@ -146,7 +138,8 @@ export function useRestaurantSearch() {
     };
   };
 
-  // --- トグル系関数 ---
+
+  
   const toggleRating = (value: string) => {
     searchForm.value.restaurantRating =
       searchForm.value.restaurantRating === value ? '' : value;

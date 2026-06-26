@@ -9,7 +9,7 @@ data class UserRegisterRequest(
     val userEmail: String,
         
     @Pattern(regexp = AppConstants.PASSWORD_REGEX)
-    val userPassword: String,
+    var userPassword: String,
     
     @NotBlank
     val userName: String,

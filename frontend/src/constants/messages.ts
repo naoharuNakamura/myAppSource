@@ -85,8 +85,8 @@ export const UI_TEXTS = {
     backToListButton: '一覧に戻る',
     loadingText: '読み込み中...',
     memoLabel: 'メモ',
-    editButton: '編集',
-    saveButton: '保存',
+    editButton: 'レビューを投稿',
+    saveButton: '投稿',
     cancelButton: 'キャンセル',
     emptyMemo: 'まだメモはありません。編集ボタンで追加してください。',
     memoPlaceholder: 'ここにメモを入力',
@@ -94,6 +94,7 @@ export const UI_TEXTS = {
   mypage: {
     userInfoTitle: 'ユーザー情報',
     favoritesTitle: 'お気に入り一覧',
+    mapTitle: 'お気に入りマップ',
     settingsButton: '設定',
     logoutButton: 'ログアウト',
     memberIdLabel: '会員ID',

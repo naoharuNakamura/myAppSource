@@ -3,12 +3,14 @@
 import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "../stores/auth";
-import { ROUTES, ROUTE_NAMES } from "../constants/types";
+import { HTTP_STATUS_CODES, ROUTES, ROUTE_NAMES } from "../constants/types";
 import { UI_TEXTS } from "../constants/messages";
+import { useFavorites } from "../composables/useFavorites";
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
+const { fetchFavoriteIds, fetchFavoriteRestaurants } = useFavorites();
 const text = UI_TEXTS.login;
 
 const userEmail = ref("");
@@ -22,11 +24,15 @@ const handleLogin = async () => {
             userPassword: userPassword.value
         });
 
+        await Promise.all([fetchFavoriteIds(), fetchFavoriteRestaurants()])
+
         const redirectPath = (route.query.redirect as string) || ROUTES.SEARCH;
         router.push(redirectPath);
-    } catch (error) {
-        hasError.value = true;
-        console.error("Login failed:", error);
+    } catch (error: any) {
+        if (error.response?.data.status === HTTP_STATUS_CODES.ANAUTHORIZED) {
+            hasError.value = true;
+        }
+
     }
 };
 
@@ -44,13 +50,14 @@ const handleLogin = async () => {
 
                 <div class="login-group">
                     <label for="userEmail">{{ text.emailLabel }}</label>
-                    <input v-model.trim="userEmail" id="userEmail" type="text" :placeholder="text.emailPlaceholder" class="form-control">
+                    <input v-model.trim="userEmail" id="userEmail" type="text" :placeholder="text.emailPlaceholder"
+                        class="form-control">
                 </div>
 
                 <div class="form-group">
                     <label for="userPassword">{{ text.passwordLabel }}</label>
-                    <input v-model="userPassword" id="userPassword" type="password" :placeholder="text.passwordPlaceholder"
-                        class="form-control" />
+                    <input v-model="userPassword" id="userPassword" type="password"
+                        :placeholder="text.passwordPlaceholder" class="form-control" />
                 </div>
 
                 <button @click="handleLogin" type="submit" class="btn-primary">
@@ -62,7 +69,8 @@ const handleLogin = async () => {
             <div class="signup-redirect">
 
                 <p>{{ text.signupHint }}</p>
-                <RouterLink :to="{ name: ROUTE_NAMES.SIGNUP }" class="signup-link-btn">{{ text.signupLink }}</RouterLink>
+                <RouterLink :to="{ name: ROUTE_NAMES.SIGNUP }" class="signup-link-btn">{{ text.signupLink }}
+                </RouterLink>
             </div>
 
         </div>

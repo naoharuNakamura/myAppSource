@@ -1,5 +1,7 @@
 package com.example.backend.model
 
+import com.fasterxml.jackson.annotation.JsonProperty
+
 data class Restaurant(
     var restaurantId: Int = 0,
     var restaurantName: String = "",
@@ -14,5 +16,10 @@ data class Restaurant(
     var restaurantPhone: String = "",
     var restaurantUrl: String = "",
     var restaurantClosedDays: String = "",
-    var isFavorite: Boolean = false
+    var latitude: Double? = null,
+    var longitude: Double? = null,
+    var isFavorite: Boolean = false,
+    
+    @JsonProperty("is_geocoded")
+    var isGeocoded: Boolean = false
 )

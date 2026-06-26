@@ -1,19 +1,49 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
+import { GoogleMap, AdvancedMarker, InfoWindow } from 'vue3-google-map';
 import { ROUTE_NAMES } from '../constants/types';
 import RestaurantCard from './RestaurantCard.vue';
 import { UI_TEXTS } from '../constants/messages';
+import { useMap } from '../composables/useMap.ts';
+import { useFavorites } from '../composables/useFavorites.ts';
+
 const authStore = useAuthStore();
+const {
+    favoriteRestaurants,
+    fetchFavoriteRestaurants,
+} = useFavorites();
+const map = useMap();
 const text = UI_TEXTS.mypage;
+const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+const mapCenter = ref({ lat: 35.681236, lng: 139.767125 });
+
+const fetchCurrentLocation = () => {
+    if (!navigator.geolocation) {
+        return
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            mapCenter.value = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+        },
+        (error) => {
+            const firstRest = favoriteRestaurants.value?.[0];
+            if (firstRest) {
+                mapCenter.value = { lat: Number(firstRest.latitude), lng: Number(firstRest.longitude) };
+            }
+            throw error;
+        }
+    )
+}
 
 onMounted(async () => {
-    if (!authStore.currentUser) return;
-    try {
-        await authStore.fetchFavoriteRestaurants();
-    } catch (error) {
-        console.error('お気に入りレストランの取得に失敗:', error);
-    }
+    fetchCurrentLocation();
+    await fetchFavoriteRestaurants();
 });
 
 </script>
@@ -37,27 +67,44 @@ onMounted(async () => {
             <h2>{{ text.favoritesTitle }}</h2>
         </div>
         <div class="card-grid">
-            <RestaurantCard v-for="rest in authStore.favoriteRestaurants" :key="rest.restaurantId" :restaurant="rest" />
+            <RestaurantCard v-for="rest in favoriteRestaurants" :key="rest.restaurantId" :restaurant="rest" />
         </div>
+    </div>
+
+    <div class="map-container">
+        <div class="map-header">
+            <h2>{{ text.mapTitle }}</h2>
+        </div>
+        <GoogleMap :api-key="googleMapsApiKey" :center="mapCenter" :zoom="15" map-id="DEMO_MAP_ID"
+            style="width: 100%; height: 500px" @ready="map.onMapReady">
+            <AdvancedMarker v-for="rest in favoriteRestaurants" :key="rest.restaurantId"
+                :options="{ position: { lat: Number(rest.latitude), lng: Number(rest.longitude) } }">
+                <InfoWindow>
+                    <div>レストラン名: {{ rest.restaurantName }}</div>
+                </InfoWindow>
+            </AdvancedMarker>
+        </GoogleMap>
     </div>
 
     <div class="btn-wrapper">
         <RouterLink :to="{ name: ROUTE_NAMES.SIGNUP }" class="back-btn">{{ text.settingsButton }}</RouterLink>
-        <RouterLink :to="{ name: ROUTE_NAMES.LOGIN }" @click.prevent="authStore.logout" class="back-btn">{{ text.logoutButton }}</RouterLink>
+        <RouterLink :to="{ name: ROUTE_NAMES.LOGIN }" @click.prevent="authStore.logout" class="back-btn">{{
+            text.logoutButton }}</RouterLink>
     </div>
 </template>
 
 <style scoped>
 .mypage-container,
-.favorites-container {
-    width: min(100%, 1200px);
-    max-width: 1200px;
+.favorites-container,
+.map-container {
+
     margin: 40px auto;
     padding: 0 24px;
 }
 
 .mypage-header,
-.favorites-header {
+.favorites-header,
+.map-header {
     border-bottom: 1px solid #e2e8f0;
     padding-bottom: 12px;
     margin-bottom: 24px;

@@ -42,30 +42,23 @@ onMounted(() => {
   fetchMasterData();
 });
 
-
-// 💡 修正ポイント②: 「この条件で再検索」ボタンが押された時の専用処理
 const onSearchSubmit = () => {
-  // 現在のクエリ文字列を一時保存
+
   const currentQueryStr = JSON.stringify(route.query);
 
-  // URLを更新する（コンポーザブルの処理を呼び出し）
   handleSearchSubmit();
 
-  // 覆いかぶさっているアコーディオンを自動で閉じ、背後のローディングや結果を見せる
   isOpen.value = false;
 
-  // ボタン押下後に生成される予定の新しいクエリを計算
   const nextQuery: Record<string, string> = Object.fromEntries(
     Object.entries(searchForm.value).filter(([_, value]) => value !== '')
   );
-  // 検索モードもクエリ比較に含める
+
   nextQuery.isAndSearch = isAndSearch.value ? 'true' : 'false';
   if (route.query.sort) {
-    nextQuery.sort = route.query.sort as string; // 現在の並び替え順を維持
+    nextQuery.sort = route.query.sort as string;
   }
 
-  // もし前回と「完全に同じ条件」でURLが変わらなかった場合、
-  // watchが動かないため、ここで手動で強制的に再検索を走らせる
   if (currentQueryStr === JSON.stringify(nextQuery)) {
     executeSearch(SEARCH_CONFIG.INITIAL_PAGE);
   }
@@ -73,7 +66,6 @@ const onSearchSubmit = () => {
 
 const onToggleSearchMode = () => {
   toggleSearchMode();
-  // executeSearch(SEARCH_CONFIG.INITIAL_PAGE);
 };
 </script>
 
@@ -113,8 +105,9 @@ const onToggleSearchMode = () => {
             <form @submit.prevent="onSearchSubmit" class="inner-search-form">
 
               <div class="form-group-block">
-                  <label for="filter-res-name">{{ text.storeNameLabel }}</label>
-                  <input id="filter-res-name" v-model="searchForm.restaurantName" type="text" :placeholder="text.storeNamePlaceholder">
+                <label for="filter-res-name">{{ text.storeNameLabel }}</label>
+                <input id="filter-res-name" v-model="searchForm.restaurantName" type="text"
+                  :placeholder="text.storeNamePlaceholder">
               </div>
 
               <div class="form-row-line">
@@ -138,8 +131,8 @@ const onToggleSearchMode = () => {
               <div class="form-group-block">
                 <label>評価</label>
                 <div class="mini-kpi-group">
-                  <button v-for="rate in SEARCH_OPTIONS.RATINGS" :key="rate"
-                    type="button" :class="['mini-btn', searchForm.restaurantRating === rate ? 'active' : '']"
+                  <button v-for="rate in SEARCH_OPTIONS.RATINGS" :key="rate" type="button"
+                    :class="['mini-btn', searchForm.restaurantRating === rate ? 'active' : '']"
                     :aria-pressed="searchForm.restaurantRating === rate" @click="toggleRating(rate)">
                     {{ rate }}
                   </button>
@@ -149,8 +142,8 @@ const onToggleSearchMode = () => {
               <div class="form-group-block">
                 <label>価格帯</label>
                 <div class="mini-kpi-group">
-                  <button v-for="price in SEARCH_OPTIONS.PRICE_RANGES" :key="price"
-                    type="button" :class="['mini-btn', searchForm.restaurantPriceRange === price ? 'active' : '']"
+                  <button v-for="price in SEARCH_OPTIONS.PRICE_RANGES" :key="price" type="button"
+                    :class="['mini-btn', searchForm.restaurantPriceRange === price ? 'active' : '']"
                     :aria-pressed="searchForm.restaurantPriceRange === price" @click="togglePrice(price)">
                     {{ price }}
                   </button>
@@ -541,8 +534,8 @@ const onToggleSearchMode = () => {
   gap: 24px;
 }
 
-@media screen and (max-width: 440px) {
-  .result-header{
+@media screen and (max-width: 750px) {
+  .result-header {
     flex-direction: column;
   }
 
@@ -556,7 +549,7 @@ const onToggleSearchMode = () => {
   }
 }
 
-@media screen and (min-width: 440px) {
+@media screen and (min-width: 750px) {
   .card-grid {
     grid-template-columns: repeat(3, 1fr);
   }

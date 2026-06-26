@@ -20,13 +20,14 @@ class WebConfig : WebMvcConfigurer {
                 override fun getResource(resourcePath: String, location: Resource): Resource {
                     val requestedResource = location.createRelative(resourcePath)
 
-                    // ファイルが存在すればそれを返し、なければ index.html (Vueの入り口) を返す
+      
                     return if (requestedResource.exists() && requestedResource.isReadable) {
                         requestedResource
                     } else {
                         ClassPathResource("/static/index.html")
                     }
                 }
-            })
+            }
+        )
     }
 }

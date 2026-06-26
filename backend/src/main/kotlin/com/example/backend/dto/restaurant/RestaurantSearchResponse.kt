@@ -15,7 +15,9 @@ data class RestaurantSearchResponse(
     val restaurantClosedDays: String = "",
     val restaurantPhone: String = "",
     val restaurantAddress: String = "",
-    val restaurantUrl: String = ""
+    val restaurantUrl: String = "",
+    val latitude: Double? = 0.0,
+    val longitude: Double? = 0.0
 ) 
 
 fun Restaurant.toSearchResponse(): RestaurantSearchResponse {
@@ -32,6 +34,8 @@ fun Restaurant.toSearchResponse(): RestaurantSearchResponse {
         restaurantClosedDays = this.restaurantClosedDays,
         restaurantPhone = this.restaurantPhone,
         restaurantAddress = this.restaurantAddress,
-        restaurantUrl = this.restaurantUrl
+        restaurantUrl = this.restaurantUrl,
+        latitude = this.latitude,
+        longitude = this.longitude
     )
 }

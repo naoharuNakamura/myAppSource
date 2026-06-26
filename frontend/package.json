@@ -9,13 +9,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@googlemaps/js-api-loader": "^2.1.1",
     "axios": "^1.18.0",
     "pinia": "^3.0.4",
     "vue": "^3.5.34",
     "vue-router": "^5.1.0",
-    "vue3-star-ratings": "^3.0.5"
+    "vue3-google-map": "^0.27.1",
+    "vue3-star-ratings": "^3.0.5",
+    "vue3-toastify": "^0.2.9"
   },
   "devDependencies": {
+    "@types/google.maps": "^3.65.2",
     "@types/node": "^24.12.3",
     "@vitejs/plugin-vue": "^6.0.6",
     "@vue/tsconfig": "^0.9.1",

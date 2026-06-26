@@ -39,10 +39,9 @@ class RestaurantController(
         @ModelAttribute request: RestaurantSearchRequest,
         @RequestParam(name = "page", defaultValue = "1") page: Int,
         @RequestParam(name = "size", defaultValue = "50") size: Int
-    ): ResponseEntity<PageInfo<RestaurantSearchResponse>> = ResponseEntity.ok(restaurantService.searchRestaurants(request, page, size))
+    ): PageInfo<RestaurantSearchResponse> = restaurantService.searchRestaurants(request, page, size)
 
     @GetMapping(ApiEndpoints.Restaurant.DETAIL)
-    fun getRestaurantDetail(@PathVariable restaurantId: Int): ResponseEntity<RestaurantSearchResponse> =
-        ResponseEntity.ok(restaurantService.getRestaurantDetail(restaurantId))
+    fun getRestaurantDetail(@PathVariable restaurantId: Int): RestaurantSearchResponse = restaurantService.getRestaurantDetail(restaurantId)
 
 }

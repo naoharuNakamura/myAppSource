@@ -1,7 +1,8 @@
-import axios, { type InternalAxiosRequestConfig, type AxiosResponse } from "axios";
-import { useAuthStore } from "../stores/auth";
-// パスは実際のプロジェクト構造に合わせてください（必要に応じて '../constants' 等へ）
+import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { API_ENDPOINTS } from "../constants/types";
+import type { ApiErrorResponse } from "../constants/types";
+import { toast } from 'vue3-toastify';
+import { ERROR_MESSAGES } from "../constants/messages";
 
 const apiClient = axios.create({
     // baseURL: 'http://localhost:8080',
@@ -10,32 +11,42 @@ const apiClient = axios.create({
     },
 });
 
-// 💡 リクエストインターセプターを追加（TypeScriptのエラー解消のため型を明記）
 apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-    // localStorage からトークンを取得
     const token = localStorage.getItem('token');
 
-    // トークンがあればヘッダーにセット
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
 
     return config;
-}, (error: any) => {
-    console.error('API request error:', error);
-    return Promise.reject(error);
-});
+}, (error: any) => Promise.reject(error));
 
-// 💡 レスポンスインターセプターを追加（TypeScriptのエラー解消のため型を明記）
 apiClient.interceptors.response.use(
-    (response: AxiosResponse) => response,
-    (error: any) => {
-        console.error('API response error:', error);
-        if (error.response?.status === 401) {
-            // トークンが無効な場合、ログアウト処理を実行
-            const authStore = useAuthStore();
-            authStore.logout();
-            // window.location.href = '/login'; // 必要に応じてリダイレクト
+    (response) => {
+
+        const method = response.config.method?.toLowerCase();
+        if (method !== 'get') {
+            const successMessage = response.data?.message || "操作が完了しました";
+            toast.success(successMessage);
+        }
+        return response;
+    },
+    (error: AxiosError) => {
+
+        const skipToast = (error.config as any)?.skipToast;
+
+        if (error.response) {
+            const errorData = error.response.data as ApiErrorResponse;
+            if (!skipToast) {
+                toast.error(errorData.message);
+            }
+            if (errorData.errorCode === 'UNAUTHORIZED') {
+                window.location.href = '/login';
+            }
+        } else {
+            if (!skipToast) {
+                toast.error(ERROR_MESSAGES.SERVER_ERROR);
+            }
         }
         return Promise.reject(error);
     }
@@ -44,28 +55,23 @@ apiClient.interceptors.response.use(
 export default apiClient;
 
 export const apiService = {
-    // ==========================================
-    // USER 関連
-    // ==========================================
+
     login(data: any) {
-        return apiClient.post(API_ENDPOINTS.USER.LOGIN, data);
+        return apiClient.post(API_ENDPOINTS.USER.LOGIN, data, { skipToast: true } as any);
     },
 
     signup(data: any) {
-        return apiClient.post(API_ENDPOINTS.USER.SIGNUP, data);
+        return apiClient.post(API_ENDPOINTS.USER.SIGNUP, data, { skipToast: true } as any);
     },
 
     getEmailExists(userEmail: string) {
-        return apiClient.get(API_ENDPOINTS.USER.CHECK_EMAIL(userEmail));
-    },
-    
-    updateProfile(data: any) {
-        return apiClient.put(API_ENDPOINTS.USER.UPDATE_PROFILE, data);
+        return apiClient.get(API_ENDPOINTS.USER.CHECK_EMAIL(userEmail), { skipToast: true } as any);
     },
 
-    // ==========================================
-    // RESTAURANT 関連
-    // ==========================================
+    updateProfile(data: any) {
+        return apiClient.put(API_ENDPOINTS.USER.UPDATE_PROFILE, data, { skipToast: true } as any);
+    },
+
     searchRestaurants(searchParams: {
         restaurantName?: string;
         restaurantRating?: string;
@@ -81,7 +87,7 @@ export const apiService = {
         return apiClient.get(API_ENDPOINTS.RESTAURANT.DETAIL(restaurantId));
     },
 
-    getGenres() { // 💡 タイポ修正 (getgenres -> getGenres)
+    getGenres() {
         return apiClient.get(API_ENDPOINTS.RESTAURANT.GENRES);
     },
 
@@ -97,14 +103,8 @@ export const apiService = {
         return apiClient.get(API_ENDPOINTS.RESTAURANT.RATINGS);
     },
 
-    // ==========================================
-    // FAVORITE (旧: USER_RESTAURANT) 関連
-    // 💡 全て userId の引数を削除し、シンプルにしました
-    // ==========================================
-    
-    // お気に入りの追加・解除 (トグル)
     toggleFavorite(restaurantId: number) {
-        return apiClient.post(API_ENDPOINTS.FAVORITE.ITEM(restaurantId), {restaurantId: restaurantId});
+        return apiClient.post(API_ENDPOINTS.FAVORITE.ITEM(restaurantId), { restaurantId: restaurantId });
     },
 
     // お気に入り一覧取得
@@ -119,11 +119,24 @@ export const apiService = {
 
     // メモの取得
     getMemoRestaurant(restaurantId: number) {
-        return apiClient.get(API_ENDPOINTS.FAVORITE.MEMO(restaurantId));
+        return apiClient.get(API_ENDPOINTS.REVIEW.REVIEW(restaurantId));
     },
 
     // メモの更新 (RESTfulの慣習に沿って put メソッドに変更)
     editMemoRestaurant(restaurantId: number, memo: string) {
-        return apiClient.put(API_ENDPOINTS.FAVORITE.MEMO(restaurantId), { memo });
-    }
+        return apiClient.put(API_ENDPOINTS.REVIEW.REVIEW(restaurantId), { memo });
+    },
+
+    getAllReviews(restaurantId: number) {
+        return apiClient.get(API_ENDPOINTS.REVIEW.REVIEW(restaurantId))
+    },
+
+    deleteReview(reviewId: number) {
+        return apiClient.post(API_ENDPOINTS.REVIEW.DELETE(reviewId))
+    },
+
+    addReview(restaurantId: number, rating: number, memo: string) {
+        return apiClient.put(API_ENDPOINTS.REVIEW.REVIEW(restaurantId), { rating, memo })
+    },
+
 };

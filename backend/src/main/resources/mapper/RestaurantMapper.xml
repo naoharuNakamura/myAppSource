@@ -6,7 +6,7 @@
     <sql id="RestaurantColumns"> restaurant_id, restaurant_name, restaurant_img, restaurant_rating,
         restaurant_genre, restaurant_price_range, restaurant_area, restaurant_open_hour,
         restaurant_close_hour, restaurant_address, restaurant_phone, restaurant_url,
-        restaurant_closed_days 
+        restaurant_closed_days, latitude, longitude, is_geocoded 
     </sql>
 
     <resultMap id="RestaurantResultMap" type="com.example.backend.model.Restaurant">
@@ -23,6 +23,9 @@
         <result property="restaurantPhone" column="restaurant_phone" />
         <result property="restaurantUrl" column="restaurant_Url" />
         <result property="restaurantClosedDays" column="restaurant_closed_days" />
+        <result property="latitude" column="latitude"/>
+        <result property="longitude" column="longitude"/>
+        <result property="isGeocoded" column="is_geocoded"/>
     </resultMap>
 
     <select id="findDistinctGenres" resultType="string">
@@ -108,5 +111,27 @@
                 </trim>
             </if>
         </where>
+    </select>
+
+    <select id="findByRestaurantIdForUpdate" resultMap="RestaurantResultMap">
+    SELECT * 
+    FROM <include refid="tablename"/> 
+    WHERE restaurant_id = #{restaurantId} 
+    </select>
+
+    <update id="updateRestaurant" parameterType="com.example.backend.model.Restaurant">
+        UPDATE <include refid="tablename" />
+        <set>
+            restaurant_rating = #{restaurantRating},
+            latitude = #{latitude},
+            longitude = #{longitude}
+        </set>
+        WHERE restaurant_id = #{restaurantId}
+    </update>
+
+    <select id="checkRestaurantExists" resultType="boolean">
+        SELECT COUNT(1) > 0 
+        FROM <include refid="tablename"/> 
+        WHERE restaurant_id = #{restaurantId}
     </select>
 </mapper>

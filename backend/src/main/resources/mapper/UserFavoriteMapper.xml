@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.backend.mapper.UserFavoriteMapper">
+
+    <sql id="tablename">t_user_favorite</sql>
+
+    <sql id="allColumns">user_id, restaurant_id, is_favorite</sql>
+
+    <resultMap id="UserFavoriteResultMap" type="com.example.backend.model.UserFavorite">
+        <id property="userFavoriteId.userId" column="user_id" />
+        <id property="userFavoriteId.restaurantId" column="restaurant_id" />
+        
+        <result property="isFavorite" column="is_favorite" javaType="boolean"/>
+
+        <association property="userFavoriteId" javaType="com.example.backend.model.UserFavorite$UserFavoriteId">
+            <result property="userId" column="user_id" />
+            <result property="restaurantId" column="restaurant_id" />
+        </association>
+    </resultMap>
+
+    <select id="findAll" resultMap="UserFavoriteResultMap">
+        SELECT *
+        FROM <include refid="tablename"/>
+    </select>
+
+    <select id="findByIdUserId" resultMap="UserFavoriteResultMap"> 
+        SELECT *
+        FROM <include refid="tablename"/> 
+        WHERE user_id = #{userId} 
+    </select>
+
+    <select id="findByIdUserIdAndIdRestaurantId" resultMap="UserFavoriteResultMap"> 
+        SELECT *
+        FROM <include refid="tablename"/> 
+        WHERE CAST(user_id AS TEXT) = CAST(#{userId} AS TEXT)
+          AND CAST(restaurant_id AS TEXT) = CAST(#{restaurantId} AS TEXT)
+    </select>
+
+    <insert id="upsert" parameterType="com.example.backend.model.UserFavorite">
+        INSERT INTO <include refid="tablename" /> (<include refid="allColumns" />) 
+        VALUES (#{userFavoriteId.userId}, #{userFavoriteId.restaurantId}, #{isFavorite}) 
+        ON CONFLICT(user_id, restaurant_id) 
+        DO UPDATE SET 
+        is_favorite = excluded.is_favorite
+    </insert>
+
+    <delete id="deleteByIdUserIdAndIdRestaurantId"> 
+        DELETE FROM <include refid="tablename" /> 
+        WHERE CAST(user_id AS TEXT) = CAST(#{userId} AS TEXT)
+          AND CAST(restaurant_id AS TEXT) = CAST(#{restaurantId} AS TEXT)
+    </delete>
+
+</mapper>

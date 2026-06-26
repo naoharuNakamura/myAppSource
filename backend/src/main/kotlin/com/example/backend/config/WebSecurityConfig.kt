@@ -1,4 +1,4 @@
-package com.example.backend.config // ※ご自身のプロジェクトのパッケージ名に合わせてください
+package com.example.backend.config 
 
 
 import com.example.backend.security.JwtAuthFilter
@@ -17,7 +17,6 @@ import org.springframework.web.cors.CorsConfiguration
 @Configuration
 @EnableWebSecurity
 class WebSecurityConfig(
-    // Autowiredの代わりにコンストラクタインジェクションを使用（Kotlinの推奨な書き方）
     private val jwtAuthenticationFilter: JwtAuthFilter
 ) {
 
@@ -38,12 +37,10 @@ class WebSecurityConfig(
         println("====== [Debug] Security Configuration Loaded (Kotlin) ======")
         
         http
-            // 🌟 CORS設定をここに集約 (OPTIONSも追加済み)
             .cors { cors ->
                 cors.configurationSource {
                     val config = CorsConfiguration()
-                    config.allowedOrigins = listOf("http://localhost:5173", "http://localhost:8080")
-                    // OPTIONS を必ず含める！
+                    config.allowedOrigins = listOf( "http://localhost:5173","http://localhost:5174", "http://localhost:8080")
                     config.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
                     config.allowedHeaders = listOf("*")
                     config.allowCredentials = true

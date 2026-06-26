@@ -12,14 +12,19 @@ object ApiEndpoints {
         const val CHECK_EMAIL = "/check-email" 
     }
 
-    object Favorite { // 💡 t_user_restaurant より「お気に入り(favorites)」という概念にする
+    object Favorite { 
         const val ROOT = "$BASE/favorites"
 
         const val LIST = ""            
         const val DETAILS = "/details"     
         const val ITEM = "/{restaurantId}" 
+    }
+    
+    object Review {
+        const val ROOT = "$BASE/review"
         
-        const val MEMO = "/{restaurantId}/memo" 
+        const val REVIEW = "/{restaurantId}" 
+        const val DELETE = "/{reviewId}"
     }
 
     object Restaurant {

@@ -3,7 +3,6 @@ import { RouterView } from 'vue-router';
 
 import CommonHeader from './components/CommonHeader.vue';
 
-
 </script>
 
 <template>

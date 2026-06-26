@@ -33,7 +33,10 @@ export const API_ENDPOINTS = {
         PRICE_RANGES: `${API_BASE}/restaurants/price-ranges`,
         AREAS: `${API_BASE}/restaurants/areas`,
         RATINGS: `${API_BASE}/restaurants/ratings`,
-        DETAIL: (restaurantId: number | string) => `${API_BASE}/restaurants/${restaurantId}`,
+        DETAIL: (restaurantId: number) => `${API_BASE}/restaurants/${restaurantId}`,
+    },
+    MAP: {
+        URL: `${API_BASE}/maps/static`
     },
 
     FAVORITE: {
@@ -41,10 +44,13 @@ export const API_ENDPOINTS = {
 
         DETAILS: `${API_BASE}/favorites/details`,
 
-        ITEM: (restaurantId: number | string) => `${API_BASE}/favorites/${restaurantId}`,
-        
-        // メモの取得(GET)・編集(PUT) (旧: GET_MEMO, EDIT_MEMO)
-        MEMO: (restaurantId: number | string) => `${API_BASE}/favorites/${restaurantId}/memo`
+        ITEM: (restaurantId: number) => `${API_BASE}/favorites/${restaurantId}`,
+
+    },
+
+    REVIEW: {
+        REVIEW: (restaurantId: number) => `${API_BASE}/review/${restaurantId}`,
+        DELETE: (reviewId: number) => `${API_BASE}/review/${reviewId}`
     }
 } as const;
 
@@ -62,6 +68,8 @@ export interface Restaurant {
     restaurantPhone: string;
     restaurantUrl: string;
     restaurantClosedDays: string;
+    latitude: number;
+    longitude: number;
 }
 
 export interface UserResponse {
@@ -72,6 +80,14 @@ export interface UserResponse {
     favoriteIds?: number[]; // お気に入りの管理用
 }
 
+export interface ApiErrorResponse {
+    status: number;
+    errorCode: string;
+    message: string;
+    details: Record<string, string>;
+    timestamp: string;
+}
+
 export const STORAGE_KEYS = {
     TOKEN: 'token',
     CURRENT_USER: 'currentUser'
@@ -80,6 +96,8 @@ export const STORAGE_KEYS = {
 export const HTTP_STATUS_CODES = {
     CONFLICT: 409,
     SERVER_ERROR: 500,
+    ANAUTHORIZED: 401,
+    NOT_FOUND: 404
 } as const;
 
 export const SEARCH_CONFIG = {

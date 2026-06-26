@@ -5,7 +5,7 @@ import { storeToRefs } from 'pinia';
 import { useRouter } from "vue-router";
 import { apiService } from "../services/api";
 import { useAuthStore } from "../stores/auth";
-import { ROUTE_NAMES, REGEX, HTTP_STATUS_CODES } from "../constants/types";
+import { ROUTE_NAMES, REGEX, HTTP_STATUS_CODES} from "../constants/types";
 import { ERROR_MESSAGES, VALIDATION_MESSAGES, UI_TEXTS } from "../constants/messages";
 
 const router = useRouter();
@@ -27,11 +27,11 @@ const userPhone = ref("");
 const handleSubmit = async () => {
     const isValid = await validateForm();
     if (!isValid) {
-        return; // エラーがあればここで処理をストップ
+        return;
     }
 
     try {
-        // userId を一度定義し、条件によって含めるか決める
+
         const userData: any = {
             userPassword: userPassword.value,
             userName: userName.value,
@@ -56,16 +56,9 @@ const handleSubmit = async () => {
             router.push({ name: ROUTE_NAMES.MYPAGE });
         }
     } catch (error: any) {
-        // 💡 確実にあらゆる場所からステータスコードを探し出し、数値(Number)に変換する
-        const statusCode = error.response?.status || error.status || 0;
 
-        if (Number(statusCode) === HTTP_STATUS_CODES.CONFLICT) {
-            // 409（重複エラー）を検知！バナーは出さず、入力欄の下を赤文字にするだけ
+        if (error.response.status === HTTP_STATUS_CODES.CONFLICT) {
             errors.value.userEmail = ERROR_MESSAGES.EMAIL_ALREADY_REGISTERED;
-        } else {
-            // 本当にサーバーが落ちている時（500）など、想定外の時だけバナーを出す
-            console.error("サーバーエラー:", error);
-            alert(ERROR_MESSAGES.SERVER_ERROR);
         }
     }
 };
@@ -129,7 +122,6 @@ const validateForm = async () => {
         errors.value.userEmail = VALIDATION_MESSAGES.EMAIL_INVALID;
         isValid = false;
     } else {
-        // --- ここから重複チェック ---
         try {
             if (!isNewSignUp.value && userEmail.value === currentUser?.value?.userEmail) {
             } else {
@@ -141,10 +133,11 @@ const validateForm = async () => {
                     isValid = false;
                 }
             }
-        } catch (error) {
-            console.error(ERROR_MESSAGES.DUPLICATE_CHECK_FAILED, error);
-            // 500エラーなどが起きた場合はとりあえずここに入る
-            isValid = false;
+        } catch (error: any) {
+            if (error.response.status===HTTP_STATUS_CODES.CONFLICT) {
+                errors.value.userEmail = ERROR_MESSAGES.EMAIL_ALREADY_REGISTERED;
+                isValid = false;
+            }
         }
     }
 

@@ -2,7 +2,6 @@ package com.example.backend.mapper
 
 import com.example.backend.dto.restaurant.RestaurantSearchRequest
 import com.example.backend.model.Restaurant
-import com.example.backend.model.UserRestaurant
 import org.apache.ibatis.annotations.Mapper
 import org.apache.ibatis.annotations.Param
 
@@ -17,4 +16,9 @@ interface RestaurantMapper {
     fun findByRestaurantId(restaurantId: Int): Restaurant?
     
     fun searchRestaurants(request: RestaurantSearchRequest): List<Restaurant>?
+    
+    fun findByRestaurantIdForUpdate(restaurantId: Int): Restaurant?    
+    fun updateRestaurant(restaurant: Restaurant)
+    
+    fun checkRestaurantExists(restaurantId: Int): Boolean
 }

@@ -1,8 +1,8 @@
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed} from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import { apiService } from '../services/api';
-import type { Restaurant } from '../constants/types';
+import { HTTP_STATUS_CODES, type Restaurant } from '../constants/types';
 import { ERROR_MESSAGES } from '../constants/messages';
 
 export function useRestaurantDetail() {
@@ -26,19 +26,8 @@ export function useRestaurantDetail() {
   });
 
   const currentUserId = computed(() => authStore.currentUser?.userId ?? null);
-  const isFavorite = computed(() => !!restaurant.value && authStore.isFavorite(restaurant.value.restaurantId));
 
   const goBack = () => router.back();
-
-  const loadMemo = async () => {
-    if (!currentUserId.value || restaurantId.value === null) return;
-    try {
-      const response = await apiService.getMemoRestaurant(restaurantId.value);
-      restaurantMemo.value = response.data.memo ?? '';
-    } catch (error) {
-      console.error('メモの取得に失敗:', error);
-    }
-  };
 
   const loadRestaurant = async () => {
     if (restaurantId.value === null) {
@@ -57,14 +46,17 @@ export function useRestaurantDetail() {
     isError.value = false;
     errorMessage.value = '';
 
+
     try {
       const response = await apiService.getRestaurantDetail(restaurantId.value);
       restaurant.value = response.data;
-      await loadMemo();
-    } catch (error) {
-      console.error(ERROR_MESSAGES.RESTAURANT_LOAD_FAILED, error);
+    } catch (error: any) {
       isError.value = true;
-      errorMessage.value = ERROR_MESSAGES.RESTAURANT_LOAD_FAILED;
+      if (error.response?.status === HTTP_STATUS_CODES.NOT_FOUND) {
+        errorMessage.value = ERROR_MESSAGES.RESTAURANT_LOAD_FAILED;
+      }else{
+        errorMessage.value = ERROR_MESSAGES.SERVER_ERROR
+      }
     } finally {
       isLoading.value = false;
     }
@@ -82,34 +74,6 @@ export function useRestaurantDetail() {
     saveError.value = '';
   };
 
-  const saveMemo = async () => {
-    if (!currentUserId.value || restaurantId.value === null || !restaurant.value) {
-      saveError.value = ERROR_MESSAGES.SERVER_ERROR;
-      return false;
-    }
-
-    isLoading.value = true;
-    saveError.value = '';
-
-    try {
-      await apiService.editMemoRestaurant(restaurant.value.restaurantId, restaurantMemo.value);
-      isEditing.value = false;
-      return true;
-    } catch (error) {
-      console.error(ERROR_MESSAGES.MEMO_SAVE_FAILED, error);
-      saveError.value = ERROR_MESSAGES.MEMO_SAVE_FAILED;
-      return false;
-    } finally {
-      isLoading.value = false;
-    }
-  };
-
-  const toggleFavorite = async () => {
-    if (!restaurant.value) return;
-    await authStore.toggleFavorite(restaurant.value.restaurantId);
-  };
-
-  onMounted(loadRestaurant);
 
   return {
     restaurant,
@@ -121,11 +85,9 @@ export function useRestaurantDetail() {
     saveError,
     currentUserId,
     restaurantId,
-    isFavorite,
     startEdit,
     cancelEdit,
-    saveMemo,
-    toggleFavorite,
     goBack,
+    loadRestaurant
   };
 }

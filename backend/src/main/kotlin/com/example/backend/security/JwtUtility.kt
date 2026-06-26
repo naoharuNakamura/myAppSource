@@ -1,6 +1,7 @@
 package com.example.backend.security
 
-import com.example.backend.config.JwtProperties
+import com.example.backend.properties.JwtProperties
+import com.example.backend.exception.DomainException
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
@@ -49,6 +50,7 @@ class JwtUtility(
                 .parseClaimsJws(token)
             true
         } catch (e: Exception) {
+            throw DomainException.Auth.Token("${e.message}")
             false
         }
     }

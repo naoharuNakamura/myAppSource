@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import StarRatings from 'vue3-star-ratings';
-import { useAuthStore } from '../stores/auth';
 import type { Restaurant } from '../constants/types';
 import { ROUTE_NAMES } from '../constants/types';
 import { UI_TEXTS } from '../constants/messages';
+import { useFavorites } from '../composables/useFavorites';
 
-const authStore = useAuthStore();
+const {
+  isFavorite,
+  toggleFavorite
+} = useFavorites()
 const text = UI_TEXTS.common;
 const props = defineProps<{
   restaurant: Restaurant
@@ -18,8 +21,8 @@ const restaurant = props.restaurant
   <div class="card-container">
     <div class="favorite-wrapper">
       <input type="checkbox" :id="'fav-' + restaurant.restaurantId"
-        :checked="authStore.isFavorite(restaurant.restaurantId)"
-        @click.stop="authStore.toggleFavorite(restaurant.restaurantId)" class="favorite-checkbox" />
+        :checked="isFavorite(restaurant.restaurantId)"
+        @click.stop="toggleFavorite(restaurant.restaurantId)" class="favorite-checkbox" />
       <label :for="'fav-' + restaurant.restaurantId" class="heart-icon"></label>
     </div>
 
